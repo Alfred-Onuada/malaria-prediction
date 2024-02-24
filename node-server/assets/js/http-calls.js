@@ -24,6 +24,19 @@ function showSuccess(msg) {
   }, 3000)
 }
 
+function showPredictionResult(msg) {
+  const resultDiv = document.getElementById('prediction-container');
+
+  resultDiv.scrollIntoView();
+  resultDiv.classList.remove('hide');
+  resultDiv.textContent = msg;
+
+  setTimeout(() => {
+    resultDiv.textContent = '';
+    resultDiv.classList.add('hide');
+  }, 20000)
+}
+
 function register() {
   const fields = ['firstName', 'lastName', 'middleName', 'hospitalName', 'email', 'phone', 'password', 'specialization'];
 
@@ -243,4 +256,70 @@ function savePassword() {
       newPassContainer.classList.add('hide');
       savePassBtn.textContent = 'Save Password';
     })
+}
+
+function handleImageUpload() {
+  const previewImage = document.getElementById('preview-image');
+  const imageInput = document.getElementById('tumor-image');
+
+  // Check if a file is selected
+  if (imageInput.files && imageInput.files[0]) {
+    const file = imageInput.files[0];
+    const reader = new FileReader();
+
+    // Check if the selected file is an image
+    if (file.type.startsWith('image/')) {
+      reader.onload = function(event) {
+        previewImage.src = event.target.result;
+        previewImage.style.maxWidth = '100%'; // Set max width to prevent stretching
+        previewImage.classList.remove('hide');
+
+        // Upload image to server
+        uploadImage(file);
+      };
+      // Read the selected file as a data URL
+      reader.readAsDataURL(file);
+    } else {
+      showError('Please upload an actual image file');
+    }
+  }
+}
+
+function uploadImage(imageFile) {
+  // Create FormData object to send the file
+  const formData = new FormData();
+  formData.append('image', imageFile);
+
+  // Send POST request to server
+  fetch('/api/make-prediction', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => {
+    if (response.ok) {
+      // Handle successful response from server
+      return response.json();
+    }
+    // Handle error response from server
+    throw new Error('Error uploading image');
+  })
+  .then(data => {
+    let chancePercent = 0;
+
+    if (data.data.confidenceScore < 0.4) {
+      chancePercent = (1 - data.data.confidenceScore) * 100
+    } else {
+      chancePercent = data.data.confidenceScore * 100
+    }
+    
+    if (data.data.inference === 'Inconclusive') {
+      showPredictionResult(`We couldn't relaibly determine if the above image is infected or not, confidence score is ${data.data.confidenceScore}`);
+      return;
+    }
+
+    showPredictionResult(`The above image has a '${chancePercent.toFixed(2)}%' chance of been '${data.data.inference}'`)
+  })
+  .catch(error => {
+    showError(error.message);
+  });
 }

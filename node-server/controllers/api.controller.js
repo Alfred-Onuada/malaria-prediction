@@ -5,6 +5,7 @@ import handle_error from "../utils/handle-error.js";
 import express from "express";
 import jwt from "jsonwebtoken";
 import {compareSync, hashSync} from 'bcrypt';
+import PREDICTION from "../models/predictions.model.js";
 
 /**
  * Creates a JWT
@@ -207,6 +208,11 @@ export async function update_profile(req, res) {
   }
 }
 
+/**
+ * @param {express.Request} req 
+ * @param {express.Response} res 
+ * @returns 
+ */
 export async function store_contact_message(req, res) {
   try {
     const data = req.body;
@@ -219,6 +225,76 @@ export async function store_contact_message(req, res) {
     await MESSAGE.create(data);
 
     res.status(200).json({message: 'Success'});
+  } catch (error) {
+    handle_error(error, res);
+  }
+}
+
+/**
+ * @param {express.Request} req 
+ * @param {express.Response} res 
+ * @returns 
+ */
+export async function make_prediction(req, res) {
+  try {
+    const {userId} = req;
+    if (typeof req.files === 'undefined' || req.files === null) {
+      res.status(400).json({message: 'Please upload the required files'});
+      return;
+    }
+
+    // always going to be a single file
+    if (Array.isArray(req.files)) {
+      res.status(400).json({message: 'Please upload only one file'});
+      return;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.files, 'image') === false) {
+      res.status(400).json({
+        message:
+          'File processing failed, please ensure the file is uploaded with the correct field name',
+      });
+      return;
+    }
+
+    // Convert file data to Blob
+    const fileBlob = new Blob([req.files.image.data], { type: req.files.image.mimetype });
+
+    // Create FormData object to send the file
+    const formData = new FormData();
+    formData.append('image', fileBlob, req.files.image.name);
+
+    // upload to flask server
+    const resp = await fetch(process.env.PREDICTION_SERVER, {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await resp.json();
+
+    let inference = "";
+
+    if (data.prediction >= 0.4 && data.prediction <= 0.6) {
+      inference = 'Inconclusive'
+    } else if (data.prediction < 0.4) {
+      inference = 'Infected'
+    } else {
+      inference = 'Not Infected'
+    }
+ 
+    // Convert file data to Base64 string
+    const base64Data = req.files.image.data.toString('base64');
+    const imageUrl = `data:${req.files.image.mimetype};base64,${base64Data}`;
+
+    // insert into the DB for predictions and return final results
+    await PREDICTION.create({
+      doctorId: userId,
+      confidenceScore: data.prediction,
+      imageUrl,
+      inference, 
+    })
+
+    res.status(200).json({message: 'Success', data: {inference, confidenceScore: data.prediction}})
   } catch (error) {
     handle_error(error, res);
   }
