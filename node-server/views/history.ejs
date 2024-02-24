@@ -64,30 +64,16 @@
             <td>Confidence</td>
             <td>Date</td>
           </thead>
+          <% predictions.forEach(prediction => { %>
           <tr>
             <td>
-              <img class="prediction-image" src="img/author1.jpg" alt="A picture uploaded on 01/01/2023">
+              <img class="prediction-image" src="<%= prediction.imageUrl %>" alt="A picture uploaded on <%= prediction.createdAt %>">
             </td>
-            <td>Cancerous</td>
-            <td>92%</td>
-            <td>01/01/2023</td>
+            <td><%= prediction.inference %></td>
+            <td><%= prediction.confidenceScore %></td>
+            <td><%= prediction.createdAt %></td>
           </tr>
-          <tr>
-            <td>
-              <img class="prediction-image" src="img/author1.jpg" alt="A picture uploaded on 01/01/2023">
-            </td>
-            <td>Cancerous</td>
-            <td>92%</td>
-            <td>01/01/2023</td>
-          </tr>
-          <tr>
-            <td>
-              <img class="prediction-image" src="img/author1.jpg" alt="A picture uploaded on 01/01/2023">
-            </td>
-            <td>Cancerous</td>
-            <td>92%</td>
-            <td>01/01/2023</td>
-          </tr>
+          <% }) %>
         </table>
       </div>
     </div>
