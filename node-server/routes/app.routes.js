@@ -32,7 +32,8 @@ router.get('/make-prediction', is_logged_in, (req, res) => {
 
 router.get('/history', is_logged_in, async (req, res) => {
   const {userId} = req;
-  const predictions = await PREDICTION.find({doctorId: userId});
+  const predictions = await PREDICTION.find({doctorId: userId})
+    .sort({createdAt: -1});
   
   res.locals.predictions = predictions;
   res.locals.role = req.role;
