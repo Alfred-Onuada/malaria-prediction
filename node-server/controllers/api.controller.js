@@ -299,3 +299,37 @@ export async function make_prediction(req, res) {
     handle_error(error, res);
   }
 }
+
+export async function update_profile_image(req, res) {
+  try {
+    const {userId} = req;
+    if (typeof req.files === 'undefined' || req.files === null) {
+      res.status(400).json({message: 'Please upload the required files'});
+      return;
+    }
+
+    // always going to be a single file
+    if (Array.isArray(req.files)) {
+      res.status(400).json({message: 'Please upload only one file'});
+      return;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.files, 'image') === false) {
+      res.status(400).json({
+        message:
+          'File processing failed, please ensure the file is uploaded with the correct field name',
+      });
+      return;
+    }
+
+    // Convert file data to Base64 string
+    const base64Data = req.files.image.data.toString('base64');
+    const imageUrl = `data:${req.files.image.mimetype};base64,${base64Data}`;
+
+    await DOCTOR.updateOne({_id: userId}, {profileImage: imageUrl});
+
+    res.status(200).json({message: 'Profile image updated successfully'});
+  } catch (error) {
+    handle_error(error, res);
+  }
+}

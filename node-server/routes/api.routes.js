@@ -6,7 +6,8 @@ import {
   admin_login,
   register_an_admin,
   store_contact_message,
-  make_prediction
+  make_prediction,
+  update_profile_image
 } from "./../controllers/api.controller.js";
 import { is_admin, is_logged_in } from "../middlewares/auth.middleware.js";
 const router = Router();
@@ -20,6 +21,8 @@ router.post('/register', register);
 router.patch('/profile', is_logged_in, update_profile);
 
 router.post('/make-prediction', is_logged_in, make_prediction);
+
+router.patch('/update-profile-image', is_logged_in, update_profile_image);
 
 // TODO:
 router.post('/youmustbeajoker/register', is_admin, register_an_admin);
