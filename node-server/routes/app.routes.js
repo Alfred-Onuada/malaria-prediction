@@ -61,6 +61,12 @@ router.get('/youmustbeajoker', (req, res) => {
   res.render('admin/login');
 })
 
+router.get('/youmustbeajoker/create-admin', (req, res) => {
+  res.locals.admin = true;
+  res.locals.role = req.role;
+  res.render('admin/add-admin.ejs');
+})
+
 router.get('/youmustbeajoker/doctors', is_admin,  async (req, res) => {
   const doctors = await DOCTOR.find({}, {password: 0, __v: 0})
   
