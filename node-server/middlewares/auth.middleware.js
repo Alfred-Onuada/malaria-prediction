@@ -38,25 +38,25 @@ export function is_logged_in(req, res, next) {
 
     next();
   } catch (error) {
-    res.status(401).json({message: 'Access Denied'});
+    res.redirect('/login');
   }
 }
 
 export function is_admin(req, res, next) {
   try {
-    const token = req.cookies['accessToken'];
+    const token = req.cookies['adminAccessToken'];
 
     const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
     req.userId = payload._id;
 
     if (payload.role !== 'admin') {
-      res.status(401).json({message: 'Access Denied'});
+      res.redirect('/login');
       return;
     }
     
     next();
   } catch (error) {
-    res.status(401).json({message: 'Access Denied'});
+    res.redirect('/login');
   }
 }

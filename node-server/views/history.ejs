@@ -51,10 +51,10 @@
     <div class="container history-container">
       <h1 class="title">Prediction History</h1>
       <div class="filters">
-        <button class="btn">All</button>
-        <button class="btn">Infected</button>
-        <button class="btn">Not Infected</button>
-        <button class="btn">Inconclusive</button>
+        <button onclick="filter('all')" class="btn active">All</button>
+        <button onclick="filter('infected')" class="btn">Infected</button>
+        <button onclick="filter('not infected')" class="btn">Not Infected</button>
+        <button onclick="filter('inconclusive')" class="btn">Inconclusive</button>
       </div>
       <div class="table-responsive">
         <table class="table">

@@ -403,3 +403,50 @@ function handleProfileImageChange() {
     }
   }
 }
+
+
+function adminLogin() {
+  const fields = ["email", "password"];
+
+  const payload = {};
+  fields.forEach((field) => {
+    payload[field] = document
+      .querySelector(`input[name='${field}']`)
+      .value.toLowerCase();
+  });
+
+  fetch("/api/youmustbeajoker/login", {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then(async (resp) => {
+      if (!resp.ok) {
+        const errData = await resp.json();
+        throw errData;
+      }
+      return resp.json();
+    })
+    .then((data) => {
+      location.assign("/youmustbeajoker/doctors");
+    })
+    .catch((err) => {
+      showError(err.message);
+    });
+
+  return false;
+}
+
+function filter(tag) {
+  const elements = document.getElementsByClassName('inference');
+
+  [].forEach.call(elements, elem => {
+    elem.parentNode.classList.add('hide');
+
+    if (tag === 'all' || elem.textContent.toLowerCase() === tag) {
+      elem.parentNode.classList.remove('hide');
+    }
+  })
+}

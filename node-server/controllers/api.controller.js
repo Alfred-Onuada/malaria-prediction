@@ -145,11 +145,13 @@ export async function admin_login(req, res) {
       return;
     }
 
+    await ADMIN.updateOne({email}, {lastLoginDate: new Date()});
+
     const accessToken = create_token(adminInfo, 'admin');
 
     res.cookie('adminAccessToken', accessToken, {maxAge: 30*24*60*60*1000, httpOnly: true});
 
-    res.status(200).json({message: 'Registration Successful'});
+    res.status(200).json({message: 'Login Successful'});
   } catch (error) {
     handle_error(error, res);
   }
