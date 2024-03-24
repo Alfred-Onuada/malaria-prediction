@@ -30,11 +30,6 @@ function showPredictionResult(msg) {
   resultDiv.scrollIntoView();
   resultDiv.classList.remove("hide");
   resultDiv.textContent = msg;
-
-  setTimeout(() => {
-    resultDiv.textContent = "";
-    resultDiv.classList.add("hide");
-  }, 20000);
 }
 
 function register() {
